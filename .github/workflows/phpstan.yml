@@ -1,4 +1,4 @@
-name: Static Analysis
+name: PHPStan Static Analysis
 
 on: [push, pull_request]
 
@@ -7,6 +7,11 @@ jobs:
     name: PHPStan
     runs-on: ubuntu-24.04
 
+    strategy:
+      matrix:
+        php-version:
+          - "8.1"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -14,8 +19,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
-          tools: composer:v2
+          php-version: "${{ matrix.php-version }}"
+          tools: [ composer:v2, cs2pr ]
           coverage: none
         env:
           update: true
@@ -24,4 +29,4 @@ jobs:
         uses: ramsey/composer-install@v2
 
       - name: Execute PHPStan
-        run: vendor/bin/phpstan analyze --no-progress
+        run: vendor/bin/phpstan analyze --error-format=checkstyle --no-progress | cs2pr

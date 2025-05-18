@@ -22,7 +22,6 @@
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.75",
-    "mll-lab/php-cs-fixer-config": "^5.11",
     "phpstan/phpstan": "^2.1",
     "phpstan/phpstan-deprecation-rules": "^2.0",
     "phpstan/phpstan-strict-rules": "^2.0",
@@ -32,5 +31,18 @@
     "psr-4": {
       "PlaystationStoreApi\\": "src/"
     }
+  },
+  "scripts": {
+    "codestyle": "php-cs-fixer fix",
+    "coverage": "phpunit --coverage-html=\".phpunit.cache/code-coverage\"",
+    "psalm": "vendor/bin/psalm.phar -c psalm.xml --show-info=true",
+    "phpstan": "phpstan analyze --memory-limit 512M --configuration .phpstan.neon",
+    "phpunit": "phpunit",
+    "test": [
+      "@psalm",
+      "@phpstan",
+      "@phpunit",
+      "@codestyle --dry-run --diff"
+    ]
   }
 }
