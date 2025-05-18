@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PlaystationStoreApi\Request;
@@ -36,7 +37,7 @@ final class RequestProductList implements BaseRequest
 
     public function createNextPageRequest(): RequestProductList
     {
-        $nextPageRequest = clone $this;
+        $nextPageRequest           = clone $this;
         $nextPageRequest->pageArgs = new Pagination(
             $this->pageArgs->size,
             $this->pageArgs->offset + $this->pageArgs->size

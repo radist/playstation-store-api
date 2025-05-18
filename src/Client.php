@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PlaystationStoreApi;
@@ -90,7 +91,7 @@ final class Client
             );
 
         } catch (Exception|GuzzleException $e) {
-           return $this->tryWithCookie($request, $cookies, $e);
+            return $this->tryWithCookie($request, $cookies, $e);
         }
     }
 
@@ -100,7 +101,7 @@ final class Client
             $cookies = [];
 
             foreach ($exception->getResponse()->getHeader('Set-Cookie') as $value) {
-                [$item,] = explode(';', $value, 2);
+                [$item,]                    = explode(';', $value, 2);
                 [$cookieName, $cookieValue] = explode('=', $item, 2);
 
                 $cookies[$cookieName] = $cookieValue;
