@@ -112,7 +112,7 @@ final class Client
         throw new ResponseException(
             $request,
             'An error occurred while trying to request',
-            $exception->getCode(),
+            (int) $exception->getCode(),
             $exception
         );
     }
