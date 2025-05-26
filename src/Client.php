@@ -25,7 +25,7 @@ final class Client
     public function __construct(
         private readonly RegionEnum $regionEnum,
         private readonly ClientInterface $client,
-        RequestLocatorService $requestServiceLocator = null
+        ?RequestLocatorService $requestServiceLocator = null
     ) {
         $this->requestServiceLocator = $requestServiceLocator ?? RequestLocatorService::default();
     }
@@ -56,6 +56,7 @@ final class Client
 
     /**
      * @throws ResponseException
+     * @param array<string, string> $cookies
      */
     public function getResponse(BaseRequest $request, array $cookies = []): ResponseInterface
     {
@@ -95,9 +96,13 @@ final class Client
         }
     }
 
-    private function tryWithCookie(BaseRequest $request, array $cookies, Throwable $exception): mixed
+    /**
+     * @param array<string, string> $cookies
+     * @throws ResponseException
+     */
+    private function tryWithCookie(BaseRequest $request, array $cookies, Throwable $exception): ResponseInterface
     {
-        if (empty($cookies) && $exception instanceof BadResponseException) {
+        if (count($cookies) === 0 && $exception instanceof BadResponseException) {
             $cookies = [];
 
             foreach ($exception->getResponse()->getHeader('Set-Cookie') as $value) {

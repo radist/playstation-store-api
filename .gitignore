@@ -3,3 +3,4 @@
 /response
 /tmp-phpqa
 .php-cs-fixer.cache
+.phpunit.result.cache
