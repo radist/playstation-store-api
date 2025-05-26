@@ -5,19 +5,4 @@
       <code><![CDATA[$cookieValue]]></code>
     </PossiblyUndefinedArrayOffset>
   </file>
-  <file src="src/RequestLocatorService.php">
-    <InvalidPropertyAssignmentValue>
-      <code><![CDATA[$this->request]]></code>
-    </InvalidPropertyAssignmentValue>
-    <InvalidReturnStatement>
-      <code><![CDATA[$this->request[$requestClassName]]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[BackedEnum]]></code>
-    </InvalidReturnType>
-    <UndefinedDocblockClass>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[private array $request = [];]]></code>
-    </UndefinedDocblockClass>
-  </file>
 </files>
