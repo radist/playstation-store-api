@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Enum;
 
+use PlaystationStoreApi\Enum\EnumFromName;
+
 enum RegionEnum: string
 {
+    use EnumFromName;
+
     case ARGENTINA = "es-ar";
 
     case AUSTRALIA = "en-au";

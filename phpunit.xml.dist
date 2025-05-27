@@ -4,8 +4,6 @@
          colors="true"
          processIsolation="false"
          stopOnFailure="false"
-         displayDetailsOnTestsThatTriggerDeprecations="true"
-         displayDetailsOnTestsThatTriggerWarnings="true"
 >
     <testsuites>
         <testsuite name="PlaystationStoreApi Test Suite">

@@ -3,6 +3,7 @@
 $finder = PhpCsFixer\Finder::create()
     ->notPath('vendor')
     ->notPath('examples')
+    ->notPath('tmp-phpqa')
     ->in(__DIR__)
     ->name('*.php')
     ->ignoreDotFiles(true)

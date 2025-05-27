@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Enum;
 
+use PlaystationStoreApi\Enum\EnumFromName;
+
 enum OperationSha256Enum: string
 {
+    use EnumFromName;
+
     case categoryGridRetrieve = '4ce7d410a4db2c8b635a48c1dcec375906ff63b19dadd87e073f8fd0c0481d35';
 
     case featuresRetrieve = '010870e8b9269c5bcf06b60190edbf5229310d8fae5b86515ad73f05bd11c4d1';
