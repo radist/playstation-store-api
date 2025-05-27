@@ -14,4 +14,4 @@ class RequestConceptStarRatingTest extends TestCase
         $req = new RequestConceptStarRating('concept-789');
         $this->assertSame('concept-789', $req->conceptId);
     }
-} 
+}

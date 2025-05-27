@@ -21,7 +21,7 @@ class RequestAddOnsByTitleIdTest extends TestCase
     public function testConstructorCustomPagination(): void
     {
         $pagination = new Pagination(50, 10);
-        $req = new RequestAddOnsByTitleId('CUSA00002', $pagination);
+        $req        = new RequestAddOnsByTitleId('CUSA00002', $pagination);
         $this->assertSame($pagination, $req->pageArgs);
     }
-} 
+}

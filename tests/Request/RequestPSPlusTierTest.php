@@ -13,7 +13,7 @@ class RequestPSPlusTierTest extends TestCase
     public function testConstructor(): void
     {
         $tier = PSPlusTierEnum::ESSENTIAL;
-        $req = new RequestPSPlusTier($tier);
+        $req  = new RequestPSPlusTier($tier);
         $this->assertSame($tier, $req->tierLabel);
     }
-} 
+}

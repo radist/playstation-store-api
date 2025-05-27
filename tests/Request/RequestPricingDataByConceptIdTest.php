@@ -14,4 +14,4 @@ class RequestPricingDataByConceptIdTest extends TestCase
         $req = new RequestPricingDataByConceptId('concept-321');
         $this->assertSame('concept-321', $req->conceptId);
     }
-} 
+}

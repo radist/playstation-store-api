@@ -14,4 +14,4 @@ class RequestProductByIdTest extends TestCase
         $req = new RequestProductById('product-111');
         $this->assertSame('product-111', $req->productId);
     }
-} 
+}

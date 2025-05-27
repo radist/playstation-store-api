@@ -14,7 +14,7 @@ class SortingTest extends TestCase
     public function testCreateFromCatalogSorting(): void
     {
         $sorting = Sorting::createFromCatalogSorting(CatalogSortingEnum::RELEASE_DATE);
-        
+
         $this->assertSame(CatalogSortingEnum::RELEASE_DATE->value, $sorting->name);
         $this->assertFalse($sorting->isAscending);
     }
@@ -25,7 +25,7 @@ class SortingTest extends TestCase
             CatalogSortingEnum::RELEASE_DATE,
             SortingDirectionEnum::ASC
         );
-        
+
         $this->assertSame(CatalogSortingEnum::RELEASE_DATE->value, $sorting->name);
         $this->assertTrue($sorting->isAscending);
     }
@@ -33,8 +33,8 @@ class SortingTest extends TestCase
     public function testConstructor(): void
     {
         $sorting = new Sorting('test', SortingDirectionEnum::ASC);
-        
+
         $this->assertSame('test', $sorting->name);
         $this->assertTrue($sorting->isAscending);
     }
-} 
+}

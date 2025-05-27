@@ -14,4 +14,4 @@ class RequestProductStarRatingTest extends TestCase
         $req = new RequestProductStarRating('product-222');
         $this->assertSame('product-222', $req->productId);
     }
-} 
+}

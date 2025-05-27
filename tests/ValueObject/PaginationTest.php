@@ -12,7 +12,7 @@ class PaginationTest extends TestCase
     public function testConstructor(): void
     {
         $pagination = new Pagination(20, 40);
-        
+
         $this->assertSame(20, $pagination->size);
         $this->assertSame(40, $pagination->offset);
     }
@@ -20,8 +20,8 @@ class PaginationTest extends TestCase
     public function testConstructorWithDefaultOffset(): void
     {
         $pagination = new Pagination(20);
-        
+
         $this->assertSame(20, $pagination->size);
         $this->assertSame(0, $pagination->offset);
     }
-} 
+}
