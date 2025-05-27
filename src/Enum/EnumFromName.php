@@ -11,6 +11,7 @@ trait EnumFromName
      */
     public static function valueFromName(string $name): self
     {
+        /** @var static */
         return constant("self::$name");
     }
 }
