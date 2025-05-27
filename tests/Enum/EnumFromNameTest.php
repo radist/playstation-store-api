@@ -42,6 +42,22 @@ class EnumFromNameTest extends TestCase
         $this->assertSame('a128042177bd93dd831164103d53b73ef790d56f51dae647064cb8f9d9fc9d1a', $enum->value);
     }
 
+    public function testPSPlusTierEnumFromName()
+    {
+        $enum = \PlaystationStoreApi\Enum\PSPlusTierEnum::valueFromName('ESSENTIAL');
+        $this->assertInstanceOf(\PlaystationStoreApi\Enum\PSPlusTierEnum::class, $enum);
+        $this->assertSame('ESSENTIAL', $enum->name);
+        $this->assertSame('TIER_10', $enum->value);
+    }
+
+    public function testSortingDirectionEnumFromName()
+    {
+        $enum = \PlaystationStoreApi\Enum\SortingDirectionEnum::valueFromName('ASC');
+        $this->assertInstanceOf(\PlaystationStoreApi\Enum\SortingDirectionEnum::class, $enum);
+        $this->assertSame('ASC', $enum->name);
+        $this->assertSame(1, $enum->value);
+    }
+
     public function testThrowsOnInvalidName()
     {
         $this->expectException(Error::class);
