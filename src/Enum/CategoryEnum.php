@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Enum;
 
-use PlaystationStoreApi\Enum\EnumFromName;
-
 enum CategoryEnum: string
 {
     use EnumFromName;

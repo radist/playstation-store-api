@@ -10,4 +10,4 @@ trait EnumFromName
     {
         return constant("self::$name");
     }
-} 
+}
