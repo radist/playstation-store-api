@@ -7,4 +7,9 @@ parameters:
     level: max
     paths:
         - src
+    scanDirectories:
+        - vendor
+    phpVersion: 80200
     ignoreErrors:
+        # Array types without value types - these are complex nested structures from API responses
+        - '#has parameter .* with no value type specified in iterable type array\.#'

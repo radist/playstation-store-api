@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Request;
 
+use PlaystationStoreApi\Dto\Catalog\CatalogResponseDataCategoryGridRetrieve;
 use PlaystationStoreApi\Enum\CatalogSortingEnum;
 use PlaystationStoreApi\Enum\CategoryEnum;
+use PlaystationStoreApi\Enum\OperationSha256Enum;
 use PlaystationStoreApi\ValueObject\Pagination;
 use PlaystationStoreApi\ValueObject\Sorting;
 
+/**
+ * Request for getting a list of products (catalog)
+ */
 final class RequestProductList implements BaseRequest
 {
     public const DEFAULT_PAGINATION_SIZE = 20;
@@ -39,12 +44,32 @@ final class RequestProductList implements BaseRequest
 
     public function createNextPageRequest(): RequestProductList
     {
-        $nextPageRequest           = clone $this;
+        $nextPageRequest = clone $this;
         $nextPageRequest->pageArgs = new Pagination(
             $this->pageArgs->size,
             $this->pageArgs->offset + $this->pageArgs->size
         );
 
         return $nextPageRequest;
+    }
+
+    public function getResponseDtoClass(): string
+    {
+        return CatalogResponseDataCategoryGridRetrieve::class;
+    }
+
+    public function getOperationName(): string
+    {
+        return OperationSha256Enum::categoryGridRetrieve->name;
+    }
+
+    public function getSha256Hash(): string
+    {
+        return OperationSha256Enum::categoryGridRetrieve->value;
+    }
+
+    public function getDataPath(): string
+    {
+        return 'data.categoryGridRetrieve';
     }
 }

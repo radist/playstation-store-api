@@ -6,6 +6,8 @@ namespace PlaystationStoreApi\Enum;
 
 enum CategoryEnum: string
 {
+    use EnumFromName;
+
     case PS4_GAMES = '44d8bb20-653e-431e-8ad0-c0a365f68d2f';
 
     case PS5_GAMES = '4cbf39e2-5749-4970-ba81-93a489e4570c';
