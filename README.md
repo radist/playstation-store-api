@@ -12,7 +12,7 @@
 - **🔧 PSR-18/PSR-17 Compatible**: Full support for PSR HTTP standards
 - **⚡ Symfony Serializer Integration**: Automatic JSON deserialization to DTOs
 - **🛡️ Enhanced Error Handling**: Typed exceptions for different HTTP status codes
-- **📚 PHP 8.1+ Features**: Readonly properties, match expressions, and modern PHP syntax
+- **📚 PHP 8.2+ Features**: Readonly properties, match expressions, and modern PHP syntax
 - **🧪 Comprehensive Testing**: 80%+ code coverage with unit and integration tests
 - **🎯 Simplified DTO Structure**: Methods now return denormalized DTOs directly (e.g., `Product` instead of `ProductResponse->data->productRetrieve`)
 - **🔧 Self-Contained Requests**: Request classes now contain their own metadata (operationName and SHA-256 hash)
@@ -22,7 +22,7 @@
 
 ## 1. Prerequisites
 
-* PHP 8.1 or later
+* PHP 8.2 or later
 * PSR-18 HTTP Client implementation (e.g., Guzzle, Symfony HTTP Client)
 * PSR-17 HTTP Factory implementation (e.g., Nyholm PSR7)
 

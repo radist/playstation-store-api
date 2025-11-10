@@ -5,8 +5,8 @@ This guide will help you migrate your code from playstation-store-api v2.1.0 to 
 ## 🚨 Breaking Changes
 
 ### 1. PHP Version Requirement
-- **v2.1.0**: PHP 7.4+
-- **v3.0.0**: PHP 8.1+
+- **v2.x**: PHP 7.4+
+- **v3.0.0**: PHP 8.2+
 
 ### 2. Dependencies
 - **v2.1.0**: Guzzle HTTP Client
@@ -49,7 +49,7 @@ This guide will help you migrate your code from playstation-store-api v2.1.0 to 
 ```json
 {
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "symfony/serializer": "^6.0",
         "symfony/property-access": "^6.0",
         "psr/http-client": "^1.0",
@@ -316,7 +316,7 @@ $result = $client->execute($customRequest);
 
 ### 3. Modern PHP Features
 - **v2.1.0**: PHP 7.4 syntax
-- **v3.0.0**: PHP 8.1+ features (readonly properties, match expressions, enums)
+- **v3.0.0**: PHP 8.2+ features (readonly properties, match expressions, enums)
 
 ### 4. Standards Compliance
 - **v2.1.0**: Guzzle-specific
@@ -456,7 +456,7 @@ $offers = $client->getPSPlusTier($request);
 
 ## 🚀 Quick Migration Checklist
 
-- [ ] Update PHP to 8.1+
+- [ ] Update PHP to 8.2+
 - [ ] Install new dependencies (PSR-18/PSR-17, Symfony Serializer, Symfony PropertyAccess)
 - [ ] Replace `new Client()` with `ClientFactory::create()` (dependencies can be auto-detected)
 - [ ] Update method calls from `get()` to specific methods (`getProductById`, `getConceptById`, etc.)
@@ -467,7 +467,7 @@ $offers = $client->getPSPlusTier($request);
 - [ ] Remove any `RequestLocatorService` usage
 - [ ] Update type hints in your code to use DTO classes instead of response wrappers
 - [ ] Test your application thoroughly
-- [ ] Update your CI/CD pipeline for PHP 8.1+
+- [ ] Update your CI/CD pipeline for PHP 8.2+
 
 ## 📞 Support
 

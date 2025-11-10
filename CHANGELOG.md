@@ -13,7 +13,7 @@
 - **🔧 PSR-18/PSR-17 Compatible**: Full support for PSR HTTP standards (requires PSR-18 HTTP Client and PSR-17 HTTP Factory implementations)
 - **⚡ Symfony Serializer Integration**: Automatic JSON deserialization to DTOs using Symfony Serializer
 - **🛡️ Enhanced Error Handling**: Typed exceptions for different HTTP status codes
-- **📚 PHP 8.1+ Features**: Readonly properties, match expressions, and modern PHP syntax
+- **📚 PHP 8.2+ Features**: Readonly properties, match expressions, and modern PHP syntax
 - **🎯 Custom Response Denormalizer**: Created `PlaystationResponseDenormalizer` that automatically unwraps API responses, eliminating the need for wrapper DTOs
 - **🔧 Hash Override Support**: Added `overrideSha256Hash(string $operationName, string $newHash)` method to `Client` class for runtime hash replacement
 - **⚡ Auto-Dependency Detection**: `ClientFactory` automatically detects and uses installed PSR-18/PSR-17 implementations (Guzzle, Nyholm PSR7, Symfony HTTP Client) when dependencies are not explicitly provided
@@ -25,7 +25,7 @@
 - Added comprehensive unit tests with 80%+ code coverage
 
 ### Changed
-- **BREAKING**: PHP version requirement: 8.1+
+- **BREAKING**: PHP version requirement: 8.2+
 - **BREAKING**: All client methods return strongly typed DTO objects:
   - `getProductById()` returns `Product`
   - `getConceptById()` returns `Concept`
