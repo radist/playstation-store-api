@@ -11,6 +11,7 @@
 >
     <issueHandlers>
         <PossiblyInvalidDocblockTag errorLevel="info" />
+        <MissingPropertyType errorLevel="suppress" />
     </issueHandlers>
     <projectFiles>
         <directory name="src" />

@@ -6,6 +6,8 @@ namespace PlaystationStoreApi\Enum;
 
 enum CatalogSortingEnum: string
 {
+    use EnumFromName;
+
     case RELEASE_DATE = 'productReleaseDate';
 
     case BESTSELLERS = 'sales30';

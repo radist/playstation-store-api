@@ -10,12 +10,12 @@ use PlaystationStoreApi\Exception\RequestNotFoundException;
 use PlaystationStoreApi\Request\RequestAddOnsByTitleId;
 use PlaystationStoreApi\Request\RequestConceptById;
 use PlaystationStoreApi\Request\RequestConceptByProductId;
+use PlaystationStoreApi\Request\RequestConceptStarRating;
 use PlaystationStoreApi\Request\RequestPricingDataByConceptId;
 use PlaystationStoreApi\Request\RequestProductById;
 use PlaystationStoreApi\Request\RequestProductList;
-use PlaystationStoreApi\Request\RequestPSPlusTier;
 use PlaystationStoreApi\Request\RequestProductStarRating;
-use PlaystationStoreApi\Request\RequestConceptStarRating;
+use PlaystationStoreApi\Request\RequestPSPlusTier;
 
 final class RequestLocatorService
 {

@@ -6,6 +6,8 @@ namespace PlaystationStoreApi\Enum;
 
 enum PSPlusTierEnum: string
 {
+    use EnumFromName;
+
     case DELUXE = 'TIER_30';
 
     case EXTRA = 'TIER_20';

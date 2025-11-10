@@ -5,6 +5,11 @@ RUN curl -sS https://getcomposer.org/installer | php \
     && composer clear-cache \
     && composer -V
 
-RUN apk add bash
+RUN apk add bash git
+
+# Install Xdebug for code coverage
+RUN apk add --no-cache $PHPIZE_DEPS linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 WORKDIR /app
