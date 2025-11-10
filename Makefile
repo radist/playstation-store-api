@@ -1,4 +1,4 @@
-.PHONY: build get_catalog_ps4 get_catalog_ps5 ps_plus_deluxe ps_plus_extra ps_plus_essential get_product_by_id get_concept_by_id get_concept_by_product_id run_example run_all_examples
+.PHONY: build get_catalog_ps4 get_catalog_ps5 ps_plus_deluxe ps_plus_extra ps_plus_essential get_product_by_id get_concept_by_id get_concept_by_product_id run_example run_all_examples test check all
 
 build:
 	docker compose build php \
@@ -23,7 +23,7 @@ ps_plus_extra:
 	make run_example name=ps_plus_extra
 
 ps_plus_essential:
-	make run_example name=ps_plus_extra
+	make run_example name=ps_plus_essential
 
 get_product_by_id:
 	make run_example name=get_product_by_id
@@ -50,7 +50,7 @@ get_catalog_new_games:
 	make run_example name=get_catalog_new_games
 
 run_example:
-	docker compose run --rm php -f examples/${name}.php > response/${name}.json
+	docker compose run --rm php -f examples/${name}.php > response/${name}.json 2>&1
 
 run_all_examples:
 	$(MAKE) get_catalog_ps4
@@ -69,4 +69,10 @@ run_all_examples:
 	$(MAKE) get_concept_star_rating
 	$(MAKE) get_catalog_new_games
 
+test:
+	docker compose run --rm php composer test
 
+check: test
+	$(MAKE) run_all_examples
+
+all: build check
