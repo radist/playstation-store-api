@@ -12,12 +12,12 @@ use PlaystationStoreApi\Dto\Product\Product;
 use PlaystationStoreApi\Dto\Subscription\PSPlusOffersResponseDataTierSelectorOffersRetrieve;
 use PlaystationStoreApi\Enum\PSPlusTierEnum;
 use PlaystationStoreApi\Request\RequestAddOnsByTitleId;
+use PlaystationStoreApi\Request\RequestCatalog;
 use PlaystationStoreApi\Request\RequestConceptById;
 use PlaystationStoreApi\Request\RequestConceptByProductId;
 use PlaystationStoreApi\Request\RequestConceptStarRating;
 use PlaystationStoreApi\Request\RequestPricingDataByConceptId;
 use PlaystationStoreApi\Request\RequestProductById;
-use PlaystationStoreApi\Request\RequestProductList;
 use PlaystationStoreApi\Request\RequestProductStarRating;
 use PlaystationStoreApi\Request\RequestPSPlusTier;
 
@@ -33,9 +33,9 @@ final class RequestTest extends TestCase
         $this->assertSame(Product::class, $request->getResponseDtoClass());
     }
 
-    public function testRequestProductListGetResponseDtoClass(): void
+    public function testRequestCatalogGetResponseDtoClass(): void
     {
-        $request = new RequestProductList('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
+        $request = new RequestCatalog('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
 
         $this->assertSame(CatalogResponseDataCategoryGridRetrieve::class, $request->getResponseDtoClass());
     }
@@ -117,16 +117,16 @@ final class RequestTest extends TestCase
         $this->assertSame('cc90404ac049d935afbd9968aef523da2b6723abfb9d586e5f77ebf7c5289006', $request->getSha256Hash());
     }
 
-    public function testRequestProductListGetOperationName(): void
+    public function testRequestCatalogGetOperationName(): void
     {
-        $request = new RequestProductList('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
+        $request = new RequestCatalog('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
 
         $this->assertSame('categoryGridRetrieve', $request->getOperationName());
     }
 
-    public function testRequestProductListGetSha256Hash(): void
+    public function testRequestCatalogGetSha256Hash(): void
     {
-        $request = new RequestProductList('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
+        $request = new RequestCatalog('category-id', new \PlaystationStoreApi\ValueObject\Pagination(20), new \PlaystationStoreApi\ValueObject\Sorting('name'));
 
         $this->assertSame('4ce7d410a4db2c8b635a48c1dcec375906ff63b19dadd87e073f8fd0c0481d35', $request->getSha256Hash());
     }

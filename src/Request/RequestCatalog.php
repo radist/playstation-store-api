@@ -12,9 +12,12 @@ use PlaystationStoreApi\ValueObject\Pagination;
 use PlaystationStoreApi\ValueObject\Sorting;
 
 /**
- * Request for getting a list of products (catalog)
+ * Request for getting a catalog (list of concepts)
+ *
+ * Note: API returns concepts, not products directly.
+ * Each concept contains a products array with related products.
  */
-final class RequestProductList implements BaseRequest
+final class RequestCatalog implements BaseRequest
 {
     public const DEFAULT_PAGINATION_SIZE = 20;
 
@@ -27,7 +30,7 @@ final class RequestProductList implements BaseRequest
     public static function createFromCategory(
         CategoryEnum $categoryEnum,
         ?Pagination $pageArgs = null
-    ): RequestProductList {
+    ): RequestCatalog {
         return new self(
             $categoryEnum->value,
             $pageArgs ?? new Pagination(self::DEFAULT_PAGINATION_SIZE),
@@ -42,7 +45,7 @@ final class RequestProductList implements BaseRequest
     ) {
     }
 
-    public function createNextPageRequest(): RequestProductList
+    public function createNextPageRequest(): RequestCatalog
     {
         $nextPageRequest = clone $this;
         $nextPageRequest->pageArgs = new Pagination(

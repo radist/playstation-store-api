@@ -152,20 +152,30 @@ echo $concept->name; // "Concept Name"
 ### 4.3. Request Catalog Data
 
 ```php
-use PlaystationStoreApi\Request\RequestProductList;
+use PlaystationStoreApi\Request\RequestCatalog;
 use PlaystationStoreApi\Dto\Catalog\CatalogResponseDataCategoryGridRetrieve;
 use PlaystationStoreApi\Enum\CategoryEnum;
 
-$request = RequestProductList::createFromCategory(CategoryEnum::PS5_GAMES);
-$catalog = $client->getProductList($request);
+$request = RequestCatalog::createFromCategory(CategoryEnum::PS5_GAMES);
+$catalog = $client->getCatalog($request);
 
 // $catalog is now a CatalogResponseDataCategoryGridRetrieve DTO object
-foreach ($catalog->products as $product) {
-    echo $product['name'] . "\n";
+// Note: API returns concepts, not products directly
+foreach ($catalog->concepts as $concept) {
+    echo $concept->name . "\n";
+    // Access products within each concept
+    if ($concept->products !== null) {
+        foreach ($concept->products as $product) {
+            echo "  - " . $product->id . "\n";
+        }
+    }
 }
 
+// Or extract all products from all concepts
+$allProducts = $catalog->getAllProducts();
+
 // Get next page
-$nextPageCatalog = $client->getProductList($request->createNextPageRequest());
+$nextPageCatalog = $client->getCatalog($request->createNextPageRequest());
 ```
 
 ### 4.4. Request Add-ons by Title ID

@@ -6,33 +6,33 @@ namespace PlaystationStoreApi\Tests\Request;
 
 use PHPUnit\Framework\TestCase;
 use PlaystationStoreApi\Enum\CategoryEnum;
-use PlaystationStoreApi\Request\RequestProductList;
+use PlaystationStoreApi\Request\RequestCatalog;
 use PlaystationStoreApi\ValueObject\Pagination;
 use PlaystationStoreApi\ValueObject\Sorting;
 
-class RequestProductListTest extends TestCase
+class RequestCatalogTest extends TestCase
 {
     public function testCreateFromCategory(): void
     {
-        $request = RequestProductList::createFromCategory(CategoryEnum::PS5_GAMES);
+        $request = RequestCatalog::createFromCategory(CategoryEnum::PS5_GAMES);
 
         $this->assertSame(CategoryEnum::PS5_GAMES->value, $request->id);
         $this->assertInstanceOf(Pagination::class, $request->pageArgs);
-        $this->assertEquals(RequestProductList::DEFAULT_PAGINATION_SIZE, $request->pageArgs->size);
+        $this->assertEquals(RequestCatalog::DEFAULT_PAGINATION_SIZE, $request->pageArgs->size);
         $this->assertInstanceOf(Sorting::class, $request->sortBy);
     }
 
     public function testCreateFromCategoryWithCustomPagination(): void
     {
         $pagination = new Pagination(50, 100);
-        $request = RequestProductList::createFromCategory(CategoryEnum::PS5_GAMES, $pagination);
+        $request = RequestCatalog::createFromCategory(CategoryEnum::PS5_GAMES, $pagination);
 
         $this->assertSame($pagination, $request->pageArgs);
     }
 
     public function testCreateNextPageRequest(): void
     {
-        $request = RequestProductList::createFromCategory(CategoryEnum::PS5_GAMES);
+        $request = RequestCatalog::createFromCategory(CategoryEnum::PS5_GAMES);
         $nextPageRequest = $request->createNextPageRequest();
 
         $this->assertNotSame($request, $nextPageRequest);
@@ -46,7 +46,7 @@ class RequestProductListTest extends TestCase
 
     public function testFilterByAndFacetOptions(): void
     {
-        $request = RequestProductList::createFromCategory(CategoryEnum::PS5_GAMES);
+        $request = RequestCatalog::createFromCategory(CategoryEnum::PS5_GAMES);
 
         $request->filterBy['test'] = 'value';
         $request->facetOptions['option'] = 'value';

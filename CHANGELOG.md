@@ -1,3 +1,27 @@
+## 3.0.2 - 2025-01-XX
+
+**BREAKING CHANGES:** This version includes breaking changes. See migration notes below.
+
+### Changed
+- **BREAKING**: Renamed `RequestProductList` to `RequestCatalog` - API returns concepts, not products directly
+- **BREAKING**: Renamed `Client::getProductList()` to `Client::getCatalog()` - more accurate naming
+- **BREAKING**: `CatalogResponseDataCategoryGridRetrieve::products` is usually empty - products are nested inside concepts
+- Updated all examples and tests to use new naming
+
+### Added
+- **📦 Enhanced Concept DTO**: Expanded `Concept` DTO to match full API response structure:
+  - Added `media` array property with `Media[]` type
+  - Added `personalizedMeta` property with `PersonalizedMeta` DTO
+  - Added `price` property with enhanced `Price` DTO (SkuPrice)
+  - Added `products` array property with `Product[]` type
+  - Added `__typename` property
+- **💰 Enhanced Price DTO**: Extended `Price` DTO to support SkuPrice structure with additional fields:
+  - Added `__typename`, `discountText`, `includesBundleOffer`, `isExclusive`, `isTiedToSubscription`
+  - Added `serviceBranding` and `upsellServiceBranding` arrays
+  - Added `upsellText` property
+  - All new fields are nullable for backward compatibility
+- **🎯 PersonalizedMeta DTO**: Created new `PersonalizedMeta` DTO for concept personalized metadata with `hasMediaOverrides` flag and `media` array
+
 ## 3.0.1 - 2025-11-10
 
 ### Fixed
@@ -29,7 +53,7 @@
 - **BREAKING**: All client methods return strongly typed DTO objects:
   - `getProductById()` returns `Product`
   - `getConceptById()` returns `Concept`
-  - `getProductList()` returns `CatalogResponseDataCategoryGridRetrieve`
+  - `getCatalog()` returns `CatalogResponseDataCategoryGridRetrieve` (renamed from `getProductList()`)
   - `getAddOnsByTitleId()` returns `AddOnsResponseDataAddOnProductsByTitleIdRetrieve`
   - `getPSPlusTier()` returns `PSPlusOffersResponseDataTierSelectorOffersRetrieve`
 - **BREAKING**: `Client` constructor requires PSR-18/PSR-17 interfaces and Symfony Serializer
@@ -38,7 +62,7 @@
 - **BREAKING**: All `Request` classes return target DTO classes in `getResponseDtoClass()`:
   - `RequestProductById` → `Product::class`
   - `RequestConceptById` → `Concept::class`
-  - `RequestProductList` → `CatalogResponseDataCategoryGridRetrieve::class`
+  - `RequestCatalog` → `CatalogResponseDataCategoryGridRetrieve::class` (renamed from `RequestProductList`)
   - `RequestAddOnsByTitleId` → `AddOnsResponseDataAddOnProductsByTitleIdRetrieve::class`
   - `RequestPSPlusTier` → `PSPlusOffersResponseDataTierSelectorOffersRetrieve::class`
 - Request classes contain their own metadata (operationName and SHA-256 hash)

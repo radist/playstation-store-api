@@ -16,12 +16,12 @@ use PlaystationStoreApi\Exception\HttpExceptionFactory;
 use PlaystationStoreApi\Exception\PsnApiException;
 use PlaystationStoreApi\Request\BaseRequest;
 use PlaystationStoreApi\Request\RequestAddOnsByTitleId;
+use PlaystationStoreApi\Request\RequestCatalog;
 use PlaystationStoreApi\Request\RequestConceptById;
 use PlaystationStoreApi\Request\RequestConceptByProductId;
 use PlaystationStoreApi\Request\RequestConceptStarRating;
 use PlaystationStoreApi\Request\RequestPricingDataByConceptId;
 use PlaystationStoreApi\Request\RequestProductById;
-use PlaystationStoreApi\Request\RequestProductList;
 use PlaystationStoreApi\Request\RequestProductStarRating;
 use PlaystationStoreApi\Request\RequestPSPlusTier;
 use Psr\Http\Client\ClientInterface;
@@ -122,11 +122,15 @@ final class Client
     }
 
     /**
-     * Get product list (catalog)
+     * Get catalog (list of concepts)
+     *
+     * Note: API returns concepts, not products directly.
+     * Each concept contains a products array with related products.
+     * Use CatalogResponseDataCategoryGridRetrieve::getAllProducts() to extract all products from concepts.
      *
      * @throws PsnApiException
      */
-    public function getProductList(RequestProductList $request): CatalogResponseDataCategoryGridRetrieve
+    public function getCatalog(RequestCatalog $request): CatalogResponseDataCategoryGridRetrieve
     {
         /** @var CatalogResponseDataCategoryGridRetrieve */
         return $this->execute($request);
