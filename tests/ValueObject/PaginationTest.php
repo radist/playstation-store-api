@@ -24,4 +24,28 @@ class PaginationTest extends TestCase
         $this->assertSame(20, $pagination->size);
         $this->assertSame(0, $pagination->offset);
     }
+
+    public function testConstructorThrowsExceptionForNegativeSize(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Size must be greater than 0, got: -1');
+
+        new Pagination(-1);
+    }
+
+    public function testConstructorThrowsExceptionForZeroSize(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Size must be greater than 0, got: 0');
+
+        new Pagination(0);
+    }
+
+    public function testConstructorThrowsExceptionForNegativeOffset(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Offset must be greater than or equal to 0, got: -1');
+
+        new Pagination(20, -1);
+    }
 }

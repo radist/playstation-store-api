@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Request;
 
+use Symfony\Component\Serializer\Attribute\Ignore;
+
 /**
  * Base interface for all PlayStation Store API requests
  */
@@ -14,6 +16,7 @@ interface BaseRequest
      *
      * @return class-string
      */
+    #[Ignore]
     public function getResponseDtoClass(): string;
 
     /**
@@ -21,6 +24,7 @@ interface BaseRequest
      *
      * @return string
      */
+    #[Ignore]
     public function getOperationName(): string;
 
     /**
@@ -28,11 +32,13 @@ interface BaseRequest
      *
      * @return string
      */
+    #[Ignore]
     public function getSha256Hash(): string;
 
     /**
      * Returns the path to data inside the DTO wrapper response.
      * @return string For example: 'data.productRetrieve'
      */
+    #[Ignore]
     public function getDataPath(): string;
 }

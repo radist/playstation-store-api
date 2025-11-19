@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi;
 
+use Http\Discovery\Exception\NotFoundException as DiscoveryNotFoundException;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 use PlaystationStoreApi\Enum\RegionEnum;
 use PlaystationStoreApi\Serializer\PlaystationResponseDenormalizer;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -32,79 +36,67 @@ final class ClientFactory
      * @param RequestFactoryInterface|null $requestFactory Optional PSR-17 request factory (auto-detected if not provided)
      * @param SerializerInterface|null $serializer Optional Symfony serializer (auto-created if not provided)
      * @param string|null $baseUri Optional base URI for API endpoint (default: 'https://web.np.playstation.com/api/graphql/v1/')
+     * @param LoggerInterface|null $logger Optional PSR-3 logger for debugging
      */
     public static function create(
         RegionEnum $region,
         ?ClientInterface $httpClient = null,
         ?RequestFactoryInterface $requestFactory = null,
         ?SerializerInterface $serializer = null,
-        ?string $baseUri = null
-    ): Client {
+        ?string $baseUri = null,
+        ?LoggerInterface $logger = null
+    ): PlaystationStoreClientInterface {
         $httpClient = $httpClient ?? self::createDefaultHttpClient();
         $requestFactory = $requestFactory ?? self::createDefaultRequestFactory();
         $serializer = $serializer ?? self::createDefaultSerializer();
 
-        return new Client($region, $httpClient, $requestFactory, $serializer, $baseUri ?? Client::DEFAULT_BASE_URI);
+        return new Client($region, $httpClient, $requestFactory, $serializer, $baseUri ?? Client::DEFAULT_BASE_URI, $logger);
     }
 
     /**
      * Create default HTTP client (requires PSR-18 implementation)
      *
+     * Uses php-http/discovery to automatically find installed PSR-18 implementations.
+     *
      * @return ClientInterface
      * @psalm-return ClientInterface
      * @phpstan-return ClientInterface
+     * @throws \RuntimeException If no PSR-18 implementation is found
      */
     private static function createDefaultHttpClient(): ClientInterface
     {
-        // Try Guzzle HTTP client
-        if (class_exists(\GuzzleHttp\Client::class)) {
-            return new \GuzzleHttp\Client([
-                'timeout' => 30,
-            ]);
+        try {
+            return Psr18ClientDiscovery::find();
+        } catch (DiscoveryNotFoundException $e) {
+            throw new \RuntimeException(
+                'HTTP client must be provided. Install a PSR-18 implementation like guzzlehttp/guzzle or symfony/http-client',
+                0,
+                $e
+            );
         }
-
-        // Try Symfony HTTP client
-        if (class_exists(\Symfony\Component\HttpClient\HttpClient::class)) {
-            $httpClient = \Symfony\Component\HttpClient\HttpClient::create([
-                'timeout' => 30,
-            ]);
-            // Check if Psr18Client exists (requires symfony/http-client ^6.3 or ^7.0)
-            if (class_exists(\Symfony\Component\HttpClient\Psr18Client::class)) {
-                /** @psalm-suppress UndefinedClass */
-                /** @var ClientInterface $psr18Client */
-                $psr18Client = new \Symfony\Component\HttpClient\Psr18Client($httpClient);
-
-                return $psr18Client;
-            }
-        }
-
-        throw new \RuntimeException(
-            'HTTP client must be provided. Install a PSR-18 implementation like guzzlehttp/guzzle or symfony/http-client'
-        );
     }
 
     /**
      * Create default request factory (requires PSR-17 implementation)
      *
+     * Uses php-http/discovery to automatically find installed PSR-17 implementations.
+     *
      * @return RequestFactoryInterface
      * @psalm-return RequestFactoryInterface
      * @phpstan-return RequestFactoryInterface
+     * @throws \RuntimeException If no PSR-17 implementation is found
      */
     private static function createDefaultRequestFactory(): RequestFactoryInterface
     {
-        // Try Nyholm PSR7
-        if (class_exists(\Nyholm\Psr7\Factory\Psr17Factory::class)) {
-            return new \Nyholm\Psr7\Factory\Psr17Factory();
+        try {
+            return Psr17FactoryDiscovery::findRequestFactory();
+        } catch (DiscoveryNotFoundException $e) {
+            throw new \RuntimeException(
+                'Request factory must be provided. Install a PSR-17 implementation like nyholm/psr7 or guzzlehttp/psr7',
+                0,
+                $e
+            );
         }
-
-        // Try Guzzle PSR7
-        if (class_exists(\GuzzleHttp\Psr7\HttpFactory::class)) {
-            return new \GuzzleHttp\Psr7\HttpFactory();
-        }
-
-        throw new \RuntimeException(
-            'Request factory must be provided. Install a PSR-17 implementation like nyholm/psr7 or guzzlehttp/psr7'
-        );
     }
 
     /**
@@ -115,11 +107,13 @@ final class ClientFactory
         $encoders = [new JsonEncoder()];
 
         // Configure PropertyInfoExtractor to read PHPDoc annotations
+        // PhpDocExtractor requires phpdocumentor/reflection-docblock (already in composer.json)
+        // PhpDocExtractor has priority (first in array) to read @var annotations like "Media[]|null"
         $phpDocExtractor = new PhpDocExtractor();
         $reflectionExtractor = new ReflectionExtractor();
         $propertyInfo = new PropertyInfoExtractor(
             [$reflectionExtractor], // PropertyListExtractorInterface
-            [$phpDocExtractor, $reflectionExtractor], // PropertyTypeExtractorInterface (PhpDocExtractor has priority)
+            [$phpDocExtractor, $reflectionExtractor], // PropertyTypeExtractorInterface (PhpDocExtractor has priority - first in array)
             [$phpDocExtractor], // PropertyDescriptionExtractorInterface
             [$reflectionExtractor], // PropertyAccessExtractorInterface
             [$reflectionExtractor] // PropertyInitializableExtractorInterface

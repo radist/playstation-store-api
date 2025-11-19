@@ -11,7 +11,11 @@ trait EnumFromName
      */
     public static function valueFromName(string $name): self
     {
-        /** @var static */
-        return constant("self::$name");
+        try {
+            /** @var static */
+            return constant("self::$name");
+        } catch (\Error $e) {
+            throw new \ValueError("Unknown enum case: $name", 0, $e);
+        }
     }
 }

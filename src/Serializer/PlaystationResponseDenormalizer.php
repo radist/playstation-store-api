@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PlaystationStoreApi\Serializer;
 
+use PlaystationStoreApi\Serializer\Attribute\PlaystationApiWrapper;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
@@ -15,6 +16,15 @@ final class PlaystationResponseDenormalizer implements DenormalizerInterface
     public function __construct(
         private readonly DenormalizerInterface $denormalizer
     ) {
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    public function getSupportedTypes(?string $format): array
+    {
+        // This denormalizer supports all types, but requires supportsDenormalization() check
+        return ['*' => false];
     }
 
     /**
@@ -32,14 +42,19 @@ final class PlaystationResponseDenormalizer implements DenormalizerInterface
             return false;
         }
 
-        // Only process target DTOs (not wrapper classes)
-        // Wrapper classes are simple classes that only contain a 'data' property
-        // We check if the type ends with 'Response' but not 'ResponseData' (which are target DTOs)
-        // or if it's a simple wrapper pattern like 'ProductResponse', 'ConceptResponse', etc.
-        $isSimpleWrapper = (str_ends_with($type, 'Response') && ! str_contains($type, 'ResponseData'))
-            || (str_ends_with($type, 'ResponseData') && ! str_contains($type, 'Retrieve') && ! str_contains($type, 'CategoryGrid'));
+        // Extract class name from type (handle arrays like "Product[]" or union types like "Product[]|null")
+        $className = $this->extractClassName($type);
+        if ($className === null || ! class_exists($className)) {
+            return false;
+        }
 
-        return ! $isSimpleWrapper;
+        // Only process target DTOs (not wrapper classes)
+        // Wrapper classes are marked with #[PlaystationApiWrapper] attribute
+        $reflection = new \ReflectionClass($className);
+        $attributes = $reflection->getAttributes(PlaystationApiWrapper::class);
+        $isWrapper = count($attributes) > 0;
+
+        return ! $isWrapper;
     }
 
     /**
@@ -61,14 +76,15 @@ final class PlaystationResponseDenormalizer implements DenormalizerInterface
         $dataArray = $data;
         $nestedData = $this->extractNestedData($dataArray, $dataPath);
 
+        // Extract class name from type (handle arrays like "Product[]" or union types like "Product[]|null")
+        $className = $this->extractClassName($type);
+        if ($className === null || ! class_exists($className)) {
+            throw new \InvalidArgumentException("Class does not exist in type: {$type}");
+        }
+
         // If nested data is null, return empty instance
         if ($nestedData === null) {
-            if (! class_exists($type)) {
-                throw new \InvalidArgumentException("Class {$type} does not exist");
-            }
-            /** @var class-string $type */
-            $className = $type;
-
+            /** @var class-string $className */
             /** @psalm-suppress InvalidStringClass */
             return new $className();
         }
@@ -115,5 +131,35 @@ final class PlaystationResponseDenormalizer implements DenormalizerInterface
         }
 
         return $current;
+    }
+
+    /**
+     * Extract class name from type string, handling arrays and union types
+     * Examples: "Product" -> "Product", "Product[]" -> "Product", "Product[]|null" -> "Product"
+     *
+     * @param string $type Type string from serializer
+     * @return string|null Class name or null if not a class type
+     */
+    private function extractClassName(string $type): ?string
+    {
+        // Remove array suffix (e.g., "Product[]" -> "Product")
+        $type = preg_replace('/\[\]$/', '', $type) ?? $type;
+
+        // Handle union types (e.g., "Product|null" -> "Product")
+        // Take the first part before "|"
+        if (str_contains($type, '|')) {
+            $parts = explode('|', $type);
+            $type = trim($parts[0] ?? '');
+        }
+
+        // Trim whitespace
+        $type = trim($type);
+
+        // Return null if empty or not a valid class name format
+        if ($type === '' || preg_match('/^[a-zA-Z_][a-zA-Z0-9_\\\\]*$/', $type) === 0) {
+            return null;
+        }
+
+        return $type;
     }
 }
