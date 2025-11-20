@@ -15,6 +15,7 @@ use PlaystationStoreApi\Request\RequestConceptStarRating;
 use PlaystationStoreApi\Request\RequestPricingDataByConceptId;
 use PlaystationStoreApi\Request\RequestProductById;
 use PlaystationStoreApi\Request\RequestProductStarRating;
+use PlaystationStoreApi\Serializer\EnumNormalizer;
 use PlaystationStoreApi\Serializer\PlaystationResponseDenormalizer;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -68,6 +69,7 @@ final class ClientTest extends TestCase
             $propertyInfo
         );
         $this->serializer = new Serializer([
+            new EnumNormalizer(),
             new DateTimeNormalizer(),
             new ArrayDenormalizer(),
             new PlaystationResponseDenormalizer($objectNormalizer),

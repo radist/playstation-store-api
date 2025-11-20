@@ -8,6 +8,7 @@ use Http\Discovery\Exception\NotFoundException as DiscoveryNotFoundException;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 use PlaystationStoreApi\Enum\RegionEnum;
+use PlaystationStoreApi\Serializer\EnumNormalizer;
 use PlaystationStoreApi\Serializer\PlaystationResponseDenormalizer;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -128,6 +129,7 @@ final class ClientFactory
         );
 
         $normalizers = [
+            new EnumNormalizer(),
             new DateTimeNormalizer(),
             new ArrayDenormalizer(),
             new PlaystationResponseDenormalizer($objectNormalizer),
