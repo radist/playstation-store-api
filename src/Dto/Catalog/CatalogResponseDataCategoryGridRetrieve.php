@@ -9,24 +9,35 @@ use PlaystationStoreApi\Dto\Concept\Concept;
 use PlaystationStoreApi\Dto\Product\Product;
 
 /**
- * Category grid retrieve data containing concepts
- *
- * Note: API returns concepts array, not products directly.
- * Each concept contains a products array with related products.
+ * Category grid retrieve data containing concepts, facets, and sorting info
  */
 final readonly class CatalogResponseDataCategoryGridRetrieve
 {
     /**
-     * @param Product[]|null $products Usually empty - products are nested inside concepts
+     * @param Product[]|null $products Usually empty in this query - products are nested inside concepts
      * @param Concept[]|null $concepts Array of concepts, each containing products
+     * @param CategoryFacet[]|null $facetOptions Available filters
+     * @param CategorySortingOption[]|null $sortingOptions Available sorting options
      */
     public function __construct(
         public ?string $id = null,
+        public ?string $localizedName = null, // e.g. "cat.gma.NewGames"
+        public ?string $reportingName = null, // e.g. "GMA_NEW_GAMES"
+
         /** @var Product[]|null */
         public ?array $products = null,
+
         /** @var Concept[]|null */
         public ?array $concepts = null,
         public ?PageInfo $pageInfo = null,
+
+        /** @var CategoryFacet[]|null */
+        public ?array $facetOptions = null, // Added: Filters
+
+        /** @var CategorySortingOption[]|null */
+        public ?array $sortingOptions = null, // Added: Available sorts
+
+        public ?CategorySortingOption $sortedBy = null, // Added: Current sort
     ) {
     }
 

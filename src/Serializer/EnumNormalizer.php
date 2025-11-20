@@ -12,19 +12,19 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 final class EnumNormalizer implements NormalizerInterface
 {
     /**
-     * @param array<string, mixed> $context
+     * @param array<array-key, mixed> $context
      */
-    public function normalize(mixed $object, ?string $format = null, array $context = []): string|int
+    public function normalize(mixed $data, ?string $format = null, array $context = []): string|int
     {
-        if (! $object instanceof \BackedEnum) {
+        if (! $data instanceof \BackedEnum) {
             throw new \InvalidArgumentException('Expected BackedEnum instance');
         }
 
-        return $object->value;
+        return $data->value;
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array<array-key, mixed> $context
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
@@ -41,4 +41,3 @@ final class EnumNormalizer implements NormalizerInterface
         ];
     }
 }
-

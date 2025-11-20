@@ -22,6 +22,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -333,5 +334,493 @@ final class ClientTest extends TestCase
 
         $this->httpClient->method('sendRequest')
             ->willReturn($this->response);
+    }
+
+    /**
+     * Test logging on successful request
+     */
+    public function testLoggingOnSuccessfulRequest(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $client = new Client(
+            RegionEnum::UNITED_STATES,
+            $this->httpClient,
+            $this->requestFactory,
+            $this->serializer,
+            Client::DEFAULT_BASE_URI,
+            $logger
+        );
+
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        // Capture all log calls to verify them
+        $infoCalls = [];
+        $debugCalls = [];
+
+        $logger->method('info')
+            ->willReturnCallback(function ($message, $context) use (&$infoCalls) {
+                $infoCalls[] = ['message' => $message, 'context' => $context];
+            });
+
+        $logger->method('debug')
+            ->willReturnCallback(function ($message, $context) use (&$debugCalls) {
+                $debugCalls[] = ['message' => $message, 'context' => $context];
+            });
+
+        $client->getProductById($request);
+
+        // Verify info log for sending request
+        $infoFound = false;
+        foreach ($infoCalls as $call) {
+            if ($call['message'] === 'Sending request to PlayStation Store API') {
+                $this->assertSame('metGetProductById', $call['context']['operation']);
+                $this->assertSame('en-us', $call['context']['region']);
+                $this->assertStringContainsString('operationName=metGetProductById', $call['context']['uri']);
+                $infoFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($infoFound, 'Info log for sending request was not found');
+
+        // Verify debug log for default hash
+        $debugHashFound = false;
+        foreach ($debugCalls as $call) {
+            if ($call['message'] === 'Using default SHA-256 hash for operation') {
+                $this->assertSame('metGetProductById', $call['context']['operation']);
+                $this->assertNotEmpty($call['context']['hash']);
+                $debugHashFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($debugHashFound, 'Debug log for default hash was not found');
+
+        // Verify debug log for request variables
+        $debugVarsFound = false;
+        foreach ($debugCalls as $call) {
+            if ($call['message'] === 'Request variables') {
+                $this->assertSame('metGetProductById', $call['context']['operation']);
+                $this->assertIsArray($call['context']['variables']);
+                $this->assertSame('CUSA12345_00', $call['context']['variables']['productId']);
+                $debugVarsFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($debugVarsFound, 'Debug log for request variables was not found');
+    }
+
+    /**
+     * Test handling invalid JSON in response (200 OK but invalid JSON body)
+     */
+    public function testHandlingInvalidJsonInResponse(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+
+        // Setup response with invalid JSON
+        $this->stream->method('getContents')
+            ->willReturn('{invalid json}');
+
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $this->response->method('getStatusCode')
+            ->willReturn(200);
+
+        $this->requestFactory->method('createRequest')
+            ->willReturn($this->request);
+
+        $this->request->method('withHeader')
+            ->willReturnSelf();
+
+        $this->httpClient->method('sendRequest')
+            ->willReturn($this->response);
+
+        $this->expectException(PsnApiException::class);
+        $this->expectExceptionMessage('Failed to decode JSON response');
+
+        $this->client->getProductById($request);
+    }
+
+    /**
+     * Test handling empty JSON response (200 OK but empty body)
+     */
+    public function testHandlingEmptyJsonResponse(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+
+        // Setup response with empty JSON
+        $this->stream->method('getContents')
+            ->willReturn('');
+
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $this->response->method('getStatusCode')
+            ->willReturn(200);
+
+        $this->requestFactory->method('createRequest')
+            ->willReturn($this->request);
+
+        $this->request->method('withHeader')
+            ->willReturnSelf();
+
+        $this->httpClient->method('sendRequest')
+            ->willReturn($this->response);
+
+        $this->expectException(PsnApiException::class);
+        $this->expectExceptionMessage('Failed to decode JSON response');
+
+        $this->client->getProductById($request);
+    }
+
+    /**
+     * Test handling truncated JSON response (200 OK but incomplete JSON)
+     */
+    public function testHandlingTruncatedJsonResponse(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+
+        // Setup response with truncated JSON (missing closing brace)
+        $this->stream->method('getContents')
+            ->willReturn('{"data":{"productRetrieve":{"id":"CUSA12345_00"');
+
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $this->response->method('getStatusCode')
+            ->willReturn(200);
+
+        $this->requestFactory->method('createRequest')
+            ->willReturn($this->request);
+
+        $this->request->method('withHeader')
+            ->willReturnSelf();
+
+        $this->httpClient->method('sendRequest')
+            ->willReturn($this->response);
+
+        $this->expectException(PsnApiException::class);
+        $this->expectExceptionMessage('Failed to decode JSON response');
+
+        $this->client->getProductById($request);
+    }
+
+    /**
+     * Test handling empty errors array (should not throw exception)
+     */
+    public function testHandlingEmptyErrorsArray(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+            'errors' => [], // Empty errors array
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        // Should not throw exception - empty errors array should be ignored
+        $result = $this->client->getProductById($request);
+
+        $this->assertInstanceOf(Product::class, $result);
+        $this->assertSame('CUSA12345_00', $result->id);
+    }
+
+    /**
+     * Test handling null errors (should not throw exception)
+     */
+    public function testHandlingNullErrors(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+            'errors' => null, // Null errors
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        // Should not throw exception - null errors should be ignored
+        $result = $this->client->getProductById($request);
+
+        $this->assertInstanceOf(Product::class, $result);
+        $this->assertSame('CUSA12345_00', $result->id);
+    }
+
+    /**
+     * Test handling errors key that is not an array (should not throw exception)
+     */
+    public function testHandlingNonArrayErrors(): void
+    {
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+            'errors' => 'not an array', // Errors is not an array
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        // Should not throw exception - non-array errors should be ignored
+        $result = $this->client->getProductById($request);
+
+        $this->assertInstanceOf(Product::class, $result);
+        $this->assertSame('CUSA12345_00', $result->id);
+    }
+
+    /**
+     * Test logging on denormalization error
+     */
+    public function testLoggingOnDenormalizationError(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+
+        // Create a custom serializer that throws exception during denormalization
+        $denormalizationException = new \RuntimeException('Denormalization failed: invalid data structure');
+
+        $mockSerializer = new class ($denormalizationException) extends Serializer {
+            private $exception;
+
+            public function __construct($exception)
+            {
+                $this->exception = $exception;
+                // Call parent with minimal normalizers
+                parent::__construct([], [new JsonEncoder()]);
+            }
+
+            public function normalize($data, ?string $format = null, array $context = []): array|string|int|float|bool
+            {
+                if (is_object($data) && method_exists($data, 'productId')) {
+                    return ['productId' => $data->productId];
+                }
+
+                return [];
+            }
+
+            public function denormalize($data, string $type, ?string $format = null, array $context = []): mixed
+            {
+                throw $this->exception;
+            }
+        };
+
+        $client = new Client(
+            RegionEnum::UNITED_STATES,
+            $this->httpClient,
+            $this->requestFactory,
+            $mockSerializer,
+            Client::DEFAULT_BASE_URI,
+            $logger
+        );
+
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                ],
+            ],
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        // Capture error calls
+        $errorCalls = [];
+        $logger->method('error')
+            ->willReturnCallback(function ($message, $context) use (&$errorCalls) {
+                $errorCalls[] = ['message' => $message, 'context' => $context];
+            });
+
+        // Also allow info and debug logs
+        $logger->method('info')->willReturnCallback(function () {});
+        $logger->method('debug')->willReturnCallback(function () {});
+
+        $this->expectException(PsnApiException::class);
+        $this->expectExceptionMessage('Unexpected error: Denormalization failed: invalid data structure');
+
+        $client->getProductById($request);
+
+        // Verify error log for denormalization error
+        $denormErrorFound = false;
+        foreach ($errorCalls as $call) {
+            if ($call['message'] === 'Denormalization error') {
+                $this->assertSame('metGetProductById', $call['context']['operation']);
+                $this->assertSame(\PlaystationStoreApi\Dto\Product\Product::class, $call['context']['dto_class']);
+                $this->assertSame('data.productRetrieve', $call['context']['data_path']);
+                $this->assertNotEmpty($call['context']['error']);
+                $this->assertIsArray($call['context']['response_data']);
+                $denormErrorFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($denormErrorFound, 'Error log for denormalization error was not found');
+    }
+
+    /**
+     * Test logging with overridden hash
+     */
+    public function testLoggingWithOverriddenHash(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $client = new Client(
+            RegionEnum::UNITED_STATES,
+            $this->httpClient,
+            $this->requestFactory,
+            $this->serializer,
+            Client::DEFAULT_BASE_URI,
+            $logger
+        );
+
+        $request = new RequestProductById('CUSA12345_00');
+        $newHash = 'custom_hash_value';
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+        $client->overrideSha256Hash('metGetProductById', $newHash);
+
+        // Capture info calls
+        $infoCalls = [];
+        $logger->method('info')
+            ->willReturnCallback(function ($message, $context) use (&$infoCalls) {
+                $infoCalls[] = ['message' => $message, 'context' => $context];
+            });
+
+        $client->getProductById($request);
+
+        // Verify info log for overridden hash
+        $hashInfoFound = false;
+        foreach ($infoCalls as $call) {
+            if ($call['message'] === 'Using overridden SHA-256 hash for operation') {
+                $this->assertSame('metGetProductById', $call['context']['operation']);
+                $this->assertSame($newHash, $call['context']['hash']);
+                $hashInfoFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($hashInfoFound, 'Info log for overridden hash was not found');
+
+        // Verify info log for sending request
+        $requestInfoFound = false;
+        foreach ($infoCalls as $call) {
+            if ($call['message'] === 'Sending request to PlayStation Store API') {
+                $requestInfoFound = true;
+
+                break;
+            }
+        }
+        $this->assertTrue($requestInfoFound, 'Info log for sending request was not found');
+    }
+
+    /**
+     * Test logging context contains correct operation name and variables
+     */
+    public function testLoggingContextContainsCorrectData(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $capturedInfoContext = null;
+        $capturedDebugContext = null;
+
+        $logger->method('info')
+            ->willReturnCallback(function ($message, $context) use (&$capturedInfoContext) {
+                if ($message === 'Sending request to PlayStation Store API') {
+                    $capturedInfoContext = $context;
+                }
+            });
+
+        $logger->method('debug')
+            ->willReturnCallback(function ($message, $context) use (&$capturedDebugContext) {
+                if ($message === 'Request variables') {
+                    $capturedDebugContext = $context;
+                }
+            });
+
+        $client = new Client(
+            RegionEnum::RUSSIA,
+            $this->httpClient,
+            $this->requestFactory,
+            $this->serializer,
+            Client::DEFAULT_BASE_URI,
+            $logger
+        );
+
+        $request = new RequestProductById('CUSA12345_00');
+        $responseData = [
+            'data' => [
+                'productRetrieve' => [
+                    'id' => 'CUSA12345_00',
+                    'name' => 'Test Game',
+                    'invariantName' => 'test-game',
+                    'platforms' => ['PS4'],
+                    'media' => [],
+                ],
+            ],
+        ];
+
+        $this->setupSuccessfulRequest($responseData);
+
+        $client->getProductById($request);
+
+        // Verify info context
+        $this->assertNotNull($capturedInfoContext);
+        $this->assertSame('metGetProductById', $capturedInfoContext['operation']);
+        $this->assertSame('ru-ru', $capturedInfoContext['region']);
+        $this->assertStringContainsString('operationName=metGetProductById', $capturedInfoContext['uri']);
+
+        // Verify debug context
+        $this->assertNotNull($capturedDebugContext);
+        $this->assertSame('metGetProductById', $capturedDebugContext['operation']);
+        $this->assertIsArray($capturedDebugContext['variables']);
+        $this->assertSame('CUSA12345_00', $capturedDebugContext['variables']['productId']);
     }
 }
