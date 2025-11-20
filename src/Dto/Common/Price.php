@@ -12,6 +12,7 @@ final readonly class Price
     /**
      * @param string[]|null $serviceBranding
      * @param string[]|null $upsellServiceBranding
+     * @param Qualification[]|null $qualifications
      */
     public function __construct(
         public ?string $__typename = null,
@@ -28,6 +29,16 @@ final readonly class Price
         public ?array $upsellServiceBranding = null,
         public ?string $upsellText = null,
         public ?string $currencyCode = null,
+
+        // Added fields based on JSON
+        public ?int $basePriceValue = null,
+        public ?int $discountedValue = null,
+        public ?string $skuId = null,
+        public ?string $rewardId = null,
+        public ?string $campaignId = null,
+        public ?string $endTime = null,
+        /** @var Qualification[]|null */
+        public ?array $qualifications = null,
     ) {
     }
 }

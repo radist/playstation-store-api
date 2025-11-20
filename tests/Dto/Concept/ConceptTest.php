@@ -10,6 +10,8 @@ use PlaystationStoreApi\Dto\Common\Media;
 use PlaystationStoreApi\Dto\Common\PersonalizedMeta;
 use PlaystationStoreApi\Dto\Common\ReleaseDateDescriptor;
 use PlaystationStoreApi\Dto\Concept\Concept;
+use PlaystationStoreApi\Dto\Concept\SelectableProducts;
+use PlaystationStoreApi\Dto\Product\Product;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -213,5 +215,72 @@ final class ConceptTest extends TestCase
         $this->assertInstanceOf(Concept::class, $concept);
         $this->assertIsArray($concept->compatibilityNotices);
         $this->assertEmpty($concept->compatibilityNotices);
+    }
+
+    public function testDeserializeConceptWithWishlistFields(): void
+    {
+        $json = '{
+            "id": "10002694",
+            "name": "Test Concept",
+            "isInWishlist": true,
+            "isWishlistable": true
+        }';
+
+        $concept = $this->serializer->deserialize($json, Concept::class, 'json');
+
+        $this->assertInstanceOf(Concept::class, $concept);
+        $this->assertTrue($concept->isInWishlist);
+        $this->assertTrue($concept->isWishlistable);
+    }
+
+    public function testDeserializeConceptWithSelectableProducts(): void
+    {
+        $json = '{
+            "id": "10002694",
+            "name": "Test Concept",
+            "selectableProducts": {
+                "purchasableProducts": [
+                    {
+                        "id": "UP1234-CUSA12345_00-0000000000000000",
+                        "name": "Test Product",
+                        "storeDisplayClassification": "FULL_GAME"
+                    },
+                    {
+                        "id": "UP1234-CUSA12345_00-0000000000000001",
+                        "name": "Test Product DLC",
+                        "storeDisplayClassification": "ADD_ON"
+                    }
+                ]
+            }
+        }';
+
+        $concept = $this->serializer->deserialize($json, Concept::class, 'json');
+
+        $this->assertInstanceOf(Concept::class, $concept);
+        $this->assertInstanceOf(SelectableProducts::class, $concept->selectableProducts);
+        $this->assertIsArray($concept->selectableProducts->purchasableProducts);
+        $this->assertCount(2, $concept->selectableProducts->purchasableProducts);
+        $this->assertContainsOnlyInstancesOf(Product::class, $concept->selectableProducts->purchasableProducts);
+        $this->assertSame('UP1234-CUSA12345_00-0000000000000000', $concept->selectableProducts->purchasableProducts[0]->id);
+        $this->assertSame('Test Product', $concept->selectableProducts->purchasableProducts[0]->name);
+        $this->assertSame('FULL_GAME', $concept->selectableProducts->purchasableProducts[0]->storeDisplayClassification);
+    }
+
+    public function testDeserializeConceptWithNullNewFields(): void
+    {
+        $json = '{
+            "id": "10002694",
+            "name": "Test Concept",
+            "isInWishlist": null,
+            "isWishlistable": null,
+            "selectableProducts": null
+        }';
+
+        $concept = $this->serializer->deserialize($json, Concept::class, 'json');
+
+        $this->assertInstanceOf(Concept::class, $concept);
+        $this->assertNull($concept->isInWishlist);
+        $this->assertNull($concept->isWishlistable);
+        $this->assertNull($concept->selectableProducts);
     }
 }

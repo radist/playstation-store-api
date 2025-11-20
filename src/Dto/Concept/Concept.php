@@ -57,6 +57,11 @@ final readonly class Concept
 
         /** @var CompatibilityNotice[]|null */
         public ?array $compatibilityNotices = null,
+
+        // Added fields based on JSON
+        public ?bool $isInWishlist = null,
+        public ?bool $isWishlistable = null,
+        public ?SelectableProducts $selectableProducts = null,
     ) {
     }
 }

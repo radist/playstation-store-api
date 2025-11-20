@@ -22,6 +22,7 @@ final readonly class Product
      * @param Media[]|null $media
      * @param LocalizedGenre[]|null $combinedLocalizedGenres
      * @param Description[]|null $descriptions
+     * @param GameCTA[]|null $mobilectas
      */
     public function __construct(
         public ?string $id = null,
@@ -48,6 +49,15 @@ final readonly class Product
         public ?array $screenLanguages = null,
         /** @var string[]|null */
         public ?array $spokenLanguages = null,
+
+        // Added fields based on JSON
+        public ?bool $isInWishlist = null,
+        public ?bool $isWishlistable = null,
+        /** @var GameCTA[]|null */
+        public ?array $mobilectas = null,
+        public ?string $subType = null, // e.g. "FULL_GAME"
+        public ?string $topCategory = null, // e.g. "GAME"
+        public ?string $type = null, // e.g. "GAME"
     ) {
     }
 }
