@@ -31,4 +31,6 @@ enum CategoryEnum: string
     case OFFERS = '16b8d09a-d0e3-44e3-96cb-a3b2a21b6d69';
 
     case ALL_CONCEPTS = '28c9c2b2-cecc-415c-9a08-482a605cb104';
+
+    case DEALS = 'f0f0c708-1358-43f7-8755-d5f3cc3d6fb7';
 }
