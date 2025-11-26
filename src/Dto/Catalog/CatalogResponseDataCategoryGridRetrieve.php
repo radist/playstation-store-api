@@ -42,20 +42,25 @@ final readonly class CatalogResponseDataCategoryGridRetrieve
     }
 
     /**
-     * Extract all products from all concepts
+     * Extract all products from both direct products array and concepts
      *
      * @return Product[]
      */
     public function getAllProducts(): array
     {
-        if ($this->concepts === null) {
-            return [];
+        $allProducts = [];
+
+        // First, add products from direct products array (PS4/PS5 categories)
+        if ($this->products !== null) {
+            $allProducts = array_merge($allProducts, $this->products);
         }
 
-        $allProducts = [];
-        foreach ($this->concepts as $concept) {
-            if ($concept->products !== null) {
-                $allProducts = array_merge($allProducts, $concept->products);
+        // Then, extract products from concepts (NEW_GAMES category)
+        if ($this->concepts !== null) {
+            foreach ($this->concepts as $concept) {
+                if ($concept->products !== null) {
+                    $allProducts = array_merge($allProducts, $concept->products);
+                }
             }
         }
 

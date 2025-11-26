@@ -9,12 +9,12 @@ use PlaystationStoreApi\Request\RequestPricingDataByConceptId;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Create client with factory (auto-detects available HTTP client implementations)
-$client = ClientFactory::create(RegionEnum::UNITED_STATES);
+$client = ClientFactory::create(RegionEnum::UKRAINE_RUSSIAN);
 
 /**
  * Example for https://store.playstation.com/en-us/concept/10002694
  */
-$request = new RequestPricingDataByConceptId('10002694');
+$request = new RequestPricingDataByConceptId('10014084');
 $concept = $client->getPricingDataByConceptId($request);
 
 // $concept is now a Concept DTO object

@@ -54,11 +54,115 @@ final class CatalogResponseDataCategoryGridRetrieveTest extends TestCase
         ], [new JsonEncoder()]);
     }
     /**
-     * Test getAllProducts returns empty array when concepts is null
+     * Test getAllProducts returns empty array when both products and concepts are null
      */
-    public function testGetAllProductsReturnsEmptyArrayWhenConceptsIsNull(): void
+    public function testGetAllProductsReturnsEmptyArrayWhenBothProductsAndConceptsAreNull(): void
     {
         $catalog = new CatalogResponseDataCategoryGridRetrieve(
+            products: null,
+            concepts: null
+        );
+
+        $result = $catalog->getAllProducts();
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test getAllProducts returns products from direct products array (PS4/PS5 structure)
+     */
+    public function testGetAllProductsReturnsProductsFromDirectProductsArray(): void
+    {
+        $product1 = new Product(
+            id: 'CUSA12345_00',
+            name: 'Product 1'
+        );
+
+        $product2 = new Product(
+            id: 'CUSA12346_00',
+            name: 'Product 2'
+        );
+
+        $catalog = new CatalogResponseDataCategoryGridRetrieve(
+            products: [$product1, $product2],
+            concepts: null
+        );
+
+        $result = $catalog->getAllProducts();
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+        $this->assertSame($product1, $result[0]);
+        $this->assertSame($product2, $result[1]);
+    }
+
+    /**
+     * Test getAllProducts returns products from direct products array when concepts is empty
+     */
+    public function testGetAllProductsReturnsProductsFromDirectProductsArrayWhenConceptsIsEmpty(): void
+    {
+        $product1 = new Product(
+            id: 'CUSA12345_00',
+            name: 'Product 1'
+        );
+
+        $product2 = new Product(
+            id: 'CUSA12346_00',
+            name: 'Product 2'
+        );
+
+        $catalog = new CatalogResponseDataCategoryGridRetrieve(
+            products: [$product1, $product2],
+            concepts: []
+        );
+
+        $result = $catalog->getAllProducts();
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+        $this->assertSame($product1, $result[0]);
+        $this->assertSame($product2, $result[1]);
+    }
+
+    /**
+     * Test getAllProducts merges products from both direct products array and concepts
+     */
+    public function testGetAllProductsMergesProductsFromBothDirectArrayAndConcepts(): void
+    {
+        $product1 = new Product(id: 'CUSA12345_00', name: 'Product 1');
+        $product2 = new Product(id: 'CUSA12346_00', name: 'Product 2');
+        $product3 = new Product(id: 'CUSA12347_00', name: 'Product 3');
+        $product4 = new Product(id: 'CUSA12348_00', name: 'Product 4');
+
+        $concept = new Concept(
+            id: '10002694',
+            name: 'Concept 1',
+            products: [$product3, $product4]
+        );
+
+        $catalog = new CatalogResponseDataCategoryGridRetrieve(
+            products: [$product1, $product2],
+            concepts: [$concept]
+        );
+
+        $result = $catalog->getAllProducts();
+
+        $this->assertIsArray($result);
+        $this->assertCount(4, $result);
+        $this->assertSame($product1, $result[0]);
+        $this->assertSame($product2, $result[1]);
+        $this->assertSame($product3, $result[2]);
+        $this->assertSame($product4, $result[3]);
+    }
+
+    /**
+     * Test getAllProducts returns empty array when products is empty array and concepts is null
+     */
+    public function testGetAllProductsReturnsEmptyArrayWhenProductsIsEmptyAndConceptsIsNull(): void
+    {
+        $catalog = new CatalogResponseDataCategoryGridRetrieve(
+            products: [],
             concepts: null
         );
 
